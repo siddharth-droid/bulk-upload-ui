@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const token = req.headers.get("authorization");
   const formData = await req.formData();
+
+  const LLMC_API_KEY = "sk-VxgzufVboRmdOuJe0OC7OkT6g5sDSdzPZYt__shz7Lw";
 
   try {
     const res = await fetch("https://dev-beta-api.llmcontrols.ai/api/v2/files/bulk", {
       method: "POST",
       headers: {
-        Authorization: token || "",
+        "x-api-key": LLMC_API_KEY,
       },
       body: formData,
     });

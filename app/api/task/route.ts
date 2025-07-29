@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const apiKey = req.headers.get("x-api-key");
   const { task_url } = await req.json();
+
+  // Hardcoded LLMC API key
+  const LLMC_API_KEY = "sk-VxgzufVboRmdOuJe0OC7OkT6g5sDSdzPZYt__shz7Lw";
 
   try {
     const res = await fetch(task_url, {
       method: "GET",
       headers: {
-        "x-api-key": apiKey || "",
+        "x-api-key": LLMC_API_KEY,
       },
     });
 

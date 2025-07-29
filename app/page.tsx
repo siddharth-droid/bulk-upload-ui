@@ -3,7 +3,6 @@
 import React, { useState, useRef } from "react";
 
 export default function FileUpload() {
-  const [bearerToken, setBearerToken] = useState("");
   const [files, setFiles] = useState<FileList | null>(null);
   const [response, setResponse] = useState<string | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
@@ -28,7 +27,7 @@ export default function FileUpload() {
   };
 
   const handleSubmit = async () => {
-    if (!bearerToken || !files?.length) return;
+    if (!files?.length) return;
 
     const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
@@ -39,9 +38,6 @@ export default function FileUpload() {
     try {
       const res = await fetch("/api/upload", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${bearerToken}`,
-        },
         body: formData,
       });
 
@@ -52,7 +48,7 @@ export default function FileUpload() {
         fileInputRef.current.value = "";
       }
     } catch (err) {
-      setResponse("Upload failed. Please check the token or server.");
+      setResponse("Upload failed. Please check the server.");
     } finally {
       setUploadLoading(false);
     }
@@ -65,12 +61,12 @@ export default function FileUpload() {
       input_value: chatInput,
       output_type: "chat",
       input_type: "chat",
-      "TextInput-prayp": {
+      "TextInput-Zbf8t": {
         value: textInput,
         output_type: "text",
         input_type: "text",
       },
-      "File-60szi": {
+      "File-xMtVx": {
         file_paths: [filePathInput],
         input_type: "file",
         output_type: "file",
@@ -149,17 +145,6 @@ export default function FileUpload() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Bearer Token</label>
-                <input
-                  type="text"
-                  placeholder="Enter Bearer Token"
-                  className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-slate-600/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  value={bearerToken}
-                  onChange={(e) => setBearerToken(e.target.value)}
-                />
-              </div>
-
-              <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">Select Files</label>
                 <input
                   ref={fileInputRef}
@@ -172,7 +157,7 @@ export default function FileUpload() {
 
               <button
                 onClick={handleSubmit}
-                disabled={uploadLoading || !bearerToken || !files}
+                disabled={uploadLoading || !files}
                 type="button"
                 className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-blue-500/25"
               >
