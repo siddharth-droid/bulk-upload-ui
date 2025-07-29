@@ -8,7 +8,6 @@ export default function FileUpload() {
   const [uploadLoading, setUploadLoading] = useState(false);
   const [apiLoading, setApiLoading] = useState(false);
 
-  const [chatInput, setChatInput] = useState("");
   const [textInput, setTextInput] = useState("");
   const [filePathInput, setFilePathInput] = useState("");
 
@@ -55,12 +54,9 @@ export default function FileUpload() {
   };
 
   const handleApiAccess = async () => {
-    if (!chatInput || !textInput || !filePathInput) return;
+    if (!textInput || !filePathInput) return;
 
     const payload = {
-      input_value: chatInput,
-      output_type: "chat",
-      input_type: "chat",
       "TextInput-Zbf8t": {
         value: textInput,
         output_type: "text",
@@ -187,17 +183,6 @@ export default function FileUpload() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Chat Input</label>
-                <input
-                  type="text"
-                  placeholder="Enter Chat Input (input_value)"
-                  className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-slate-600/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                />
-              </div>
-
-              <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">Text Input</label>
                 <input
                   type="text"
@@ -221,7 +206,7 @@ export default function FileUpload() {
 
               <button
                 onClick={handleApiAccess}
-                disabled={apiLoading || !chatInput || !textInput || !filePathInput}
+                disabled={apiLoading || !textInput || !filePathInput}
                 type="button"
                 className="w-full py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-purple-500/25"
               >
@@ -231,9 +216,9 @@ export default function FileUpload() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Calling API...
+                    Sending...
                   </span>
-                ) : "Send to API"}
+                ) : "SEND"}
               </button>
             </div>
           </div>
