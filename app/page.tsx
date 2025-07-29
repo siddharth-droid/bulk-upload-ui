@@ -22,7 +22,41 @@ export default function FileUpload() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFiles(e.target.files);
+    const newFiles = e.target.files;
+    if (!newFiles) return;
+
+    if (files && files.length > 0) {
+      // Append new files to existing ones
+      const dt = new DataTransfer();
+      
+      // Add existing files
+      Array.from(files).forEach(file => {
+        dt.items.add(file);
+      });
+      
+      // Add new files (avoiding duplicates)
+      Array.from(newFiles).forEach(newFile => {
+        const isDuplicate = Array.from(files).some(existingFile => 
+          existingFile.name === newFile.name && 
+          existingFile.size === newFile.size &&
+          existingFile.lastModified === newFile.lastModified
+        );
+        
+        if (!isDuplicate) {
+          dt.items.add(newFile);
+        }
+      });
+      
+      setFiles(dt.files.length > 0 ? dt.files : null);
+    } else {
+      // No existing files, just set the new ones
+      setFiles(newFiles);
+    }
+    
+    // Clear the input value to allow selecting the same files again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleSubmit = async () => {
@@ -114,8 +148,37 @@ export default function FileUpload() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Custom Scrollbar Styles */}
+      <style jsx global>{`
+        /* Custom Scrollbar Styling */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(51, 65, 85, 0.3);
+          border-radius: 4px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(100, 116, 139, 0.6);
+          border-radius: 4px;
+          transition: background 0.2s ease;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(148, 163, 184, 0.8);
+        }
+        
+        /* Firefox */
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(100, 116, 139, 0.6) rgba(51, 65, 85, 0.3);
+        }
+      `}</style>
+
       {/* Header */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 custom-scrollbar">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent mb-4">
             LLM Controls Hub
@@ -142,13 +205,57 @@ export default function FileUpload() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">Select Files</label>
+                
+                {/* Hidden file input */}
                 <input
                   ref={fileInputRef}
                   type="file"
                   multiple
-                  className="w-full text-sm file:bg-blue-500 file:text-white file:py-2 file:px-4 file:rounded-lg file:border-0 file:cursor-pointer file:font-medium bg-slate-700/50 text-slate-300 rounded-xl border border-slate-600/50 cursor-pointer"
+                  className="hidden"
                   onChange={handleFileChange}
                 />
+                
+                {/* Custom file picker button */}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  type="button"
+                  className="w-full py-4 px-6 bg-slate-700/50 hover:bg-slate-700/70 text-slate-300 hover:text-white rounded-xl border border-slate-600/50 hover:border-slate-500 transition-all duration-200 flex items-center justify-center space-x-3 group"
+                >
+                  <svg className="w-5 h-5 text-slate-400 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <span className="font-medium">Choose Files</span>
+                </button>
+                
+                {/* Custom File Count Display */}
+                {files && files.length > 0 && (
+                  <div className="mt-3 flex items-center justify-between bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                        <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-blue-300">
+                          {files.length} {files.length === 1 ? 'file' : 'files'} selected
+                        </p>
+                        <p className="text-xs text-slate-400">Ready to upload • Click "Choose Files" to add more</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setFiles(null);
+                        if (fileInputRef.current) {
+                          fileInputRef.current.value = "";
+                        }
+                      }}
+                      className="text-xs text-slate-400 hover:text-red-400 transition-colors px-2 py-1 rounded hover:bg-red-500/10"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                )}
               </div>
 
               <button
@@ -186,7 +293,7 @@ export default function FileUpload() {
                 <label className="block text-sm font-medium text-slate-300 mb-2">Text Input</label>
                 <input
                   type="text"
-                  placeholder="Enter Text Input (value)"
+                  placeholder="Enter Text Input"
                   className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-slate-600/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
@@ -279,7 +386,7 @@ export default function FileUpload() {
                 <h3 className="text-xl font-bold text-white">API Response</h3>
               </div>
               <div className="bg-slate-900/50 rounded-2xl p-6 border border-slate-600/30">
-                <pre className="text-slate-300 text-sm overflow-x-auto whitespace-pre-wrap max-h-96 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
+                <pre className="text-slate-300 text-sm overflow-x-auto whitespace-pre-wrap max-h-96 custom-scrollbar">
                   {response}
                 </pre>
               </div>
@@ -297,7 +404,7 @@ export default function FileUpload() {
                 <h3 className="text-xl font-bold text-white">Task Results</h3>
               </div>
               <div className="bg-slate-900/50 rounded-2xl p-6 border border-slate-600/30">
-                <pre className="text-slate-300 text-sm overflow-x-auto whitespace-pre-wrap max-h-96 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
+                <pre className="text-slate-300 text-sm overflow-x-auto whitespace-pre-wrap max-h-96 custom-scrollbar">
                   {taskResponse}
                 </pre>
               </div>
