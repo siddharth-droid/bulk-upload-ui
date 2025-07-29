@@ -4,7 +4,6 @@ import React, { useState, useRef } from "react";
 
 export default function FileUpload() {
   const [bearerToken, setBearerToken] = useState("");
-  const [token, setToken] = useState("");
   const [files, setFiles] = useState<FileList | null>(null);
   const [response, setResponse] = useState<string | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
@@ -18,6 +17,9 @@ export default function FileUpload() {
   const [taskUrl, setTaskUrl] = useState("");
   const [taskResponse, setTaskResponse] = useState<string | null>(null);
   const [pollingLoading, setPollingLoading] = useState(false);
+
+  // Hardcoded LLMC API key
+  const LLMC_API_KEY = "sk-VxgzufVboRmdOuJe0OC7OkT6g5sDSdzPZYt__shz7Lw";
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -57,7 +59,7 @@ export default function FileUpload() {
   };
 
   const handleApiAccess = async () => {
-    if (!token || !chatInput || !textInput || !filePathInput) return;
+    if (!chatInput || !textInput || !filePathInput) return;
 
     const payload = {
       input_value: chatInput,
@@ -81,7 +83,7 @@ export default function FileUpload() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": token,
+          "x-api-key": LLMC_API_KEY,
         },
         body: JSON.stringify(payload),
       });
@@ -96,7 +98,7 @@ export default function FileUpload() {
   };
 
   const handleTaskPolling = async () => {
-    if (!taskUrl || !token) return;
+    if (!taskUrl) return;
 
     setPollingLoading(true);
     try {
@@ -104,7 +106,7 @@ export default function FileUpload() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": token,
+          "x-api-key": LLMC_API_KEY,
         },
         body: JSON.stringify({ task_url: taskUrl }),
       });
@@ -200,17 +202,6 @@ export default function FileUpload() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">LLMC API Key</label>
-                <input
-                  type="text"
-                  placeholder="Enter LLMC API KEY"
-                  className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-slate-600/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  value={token}
-                  onChange={(e) => setToken(e.target.value)}
-                />
-              </div>
-
-              <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">Chat Input</label>
                 <input
                   type="text"
@@ -245,7 +236,7 @@ export default function FileUpload() {
 
               <button
                 onClick={handleApiAccess}
-                disabled={apiLoading || !token || !chatInput || !textInput || !filePathInput}
+                disabled={apiLoading || !chatInput || !textInput || !filePathInput}
                 type="button"
                 className="w-full py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-purple-500/25"
               >
@@ -275,17 +266,6 @@ export default function FileUpload() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">LLMC API Key</label>
-                <input
-                  type="text"
-                  placeholder="Enter LLMC API KEY"
-                  className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-slate-600/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                  value={token}
-                  onChange={(e) => setToken(e.target.value)}
-                />
-              </div>
-
-              <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">Task URL</label>
                 <input
                   type="text"
@@ -298,7 +278,7 @@ export default function FileUpload() {
 
               <button
                 onClick={handleTaskPolling}
-                disabled={pollingLoading || !taskUrl || !token}
+                disabled={pollingLoading || !taskUrl}
                 type="button"
                 className="w-full py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-emerald-500/25"
               >
