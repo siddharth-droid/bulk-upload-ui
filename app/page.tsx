@@ -127,9 +127,35 @@ export default function FileUpload() {
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent mb-4">
             LLM Controls Hub
           </h1>
-          <p className="text-slate-300 text-lg max-w-2xl mx-auto">
-          AI-Powered File Analysis Made Simple
-          </p>
+          <div className="flex items-center justify-center gap-3">
+            <p className="text-slate-300 text-lg">
+              AI-Powered File Analysis Made Simple
+            </p>
+            <div className="relative group">
+              <div className="w-5 h-5 bg-slate-700/50 hover:bg-slate-600/50 rounded-full flex items-center justify-center cursor-help transition-all duration-200 border border-slate-600/30 hover:border-slate-500/50">
+                <svg className="w-3 h-3 text-slate-400 group-hover:text-slate-300" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-slate-800/95 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                <div className="text-sm text-slate-300 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span>📁</span>
+                    <span>Supported: PDF, DOC, DOCX files</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>📊</span>
+                    <span>Max size: 50MB per file</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>🚀</span>
+                    <span>Upload → Get AI analysis instantly</span>
+                  </div>
+                </div>
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-slate-800/95"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Single AI Processing Section */}
