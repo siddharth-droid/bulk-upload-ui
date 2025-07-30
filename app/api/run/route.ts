@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
+  console.log("📝 Received payload for LLMC API:", JSON.stringify(body, null, 2));
+
   // Hardcoded LLMC API key
   const LLMC_API_KEY = "sk-VxgzufVboRmdOuJe0OC7OkT6g5sDSdzPZYt__shz7Lw";
 
@@ -25,6 +27,7 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await res.json();
+    console.log("✅ LLMC API Response:", JSON.stringify(data, null, 2));
     return NextResponse.json(data);
   } catch (err) {
     return NextResponse.json({ 

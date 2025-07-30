@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { upload } from '@vercel/blob/client';
 
 export default function FileUpload() {
   const [files, setFiles] = useState<File[]>([]);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
-
-  // Hardcoded LLMC API key
-  const LLMC_API_KEY = "sk-VxgzufVboRmdOuJe0OC7OkT6g5sDSdzPZYt__shz7Lw";
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -48,66 +46,35 @@ export default function FileUpload() {
     setAiResponse(null);
 
     try {
-      const formData = new FormData();
-      files.forEach(file => {
-        formData.append("files", file);
+      // Step 1: Upload files directly to Vercel Blob (bypasses 4.5MB limit)
+      const uploadPromises = files.map(async (file) => {
+        const blob = await upload(file.name, file, {
+          access: 'public',
+          handleUploadUrl: '/api/upload-handler',
+        });
+        console.log("📄 Blob response for", file.name, ":", blob);
+        return blob.url;
       });
 
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!uploadRes.ok) {
-        throw new Error(`Upload failed with status: ${uploadRes.status}`);
-      }
-
-      const uploadData = await uploadRes.json();
+      const blobUrls = await Promise.all(uploadPromises);
       
-      let filePaths = [];
-      
-      if (uploadData && uploadData.file_paths) {
-        filePaths = uploadData.file_paths;
-      } else if (uploadData && uploadData.files) {
-        filePaths = uploadData.files.map((file: any) => file.path || file.file_path || file.url || file.filepath).filter(Boolean);
-      } else if (uploadData && uploadData.data) {
-        if (uploadData.data.file_paths) {
-          filePaths = uploadData.data.file_paths;
-        } else if (uploadData.data.files) {
-          filePaths = uploadData.data.files.map((file: any) => file.path || file.file_path || file.url || file.filepath).filter(Boolean);
-        }
-      } else if (uploadData && Array.isArray(uploadData)) {
-        filePaths = uploadData.map((item: any) => item.path || item.file_path || item.url || item.filepath).filter(Boolean);
-      } else {
-        throw new Error(`No file paths found in upload response`);
-      }
+      console.log("🔗 Vercel Blob URLs generated:", blobUrls);
 
-      if (!filePaths || filePaths.length === 0) {
-        throw new Error(`No valid file paths received from upload`);
-      }
-
-      const apiPayload = {
-        "File-xMtVx": {
-          file_paths: filePaths,
-          input_type: "file",
-          output_type: "file",
-        },
-      };
-
-      const apiRes = await fetch("/api/run", {
+      // Step 2: Send blob URLs to our backend for download + LLMC upload + AI processing
+      const processRes = await fetch("/api/process-files", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": LLMC_API_KEY,
         },
-        body: JSON.stringify(apiPayload),
+        body: JSON.stringify({ blobUrls }),
       });
 
-      if (!apiRes.ok) {
-        throw new Error(`AI processing failed with status: ${apiRes.status}`);
+      if (!processRes.ok) {
+        const errorData = await processRes.json();
+        throw new Error(errorData.details || `Processing failed with status: ${processRes.status}`);
       }
 
-      const apiData = await apiRes.json();
+      const apiData = await processRes.json();
       setAiResponse(JSON.stringify(apiData, null, 2));
       
       setFiles([]);
@@ -244,7 +211,7 @@ export default function FileUpload() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Processing with AI...
+                    Uploading to cloud → Transferring to LLMC → Processing with AI...
                   </span>
                 ) : "Process Files with AI"}
               </button>
