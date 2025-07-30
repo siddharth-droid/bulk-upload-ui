@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   const LLMC_API_KEY = "sk-VxgzufVboRmdOuJe0OC7OkT6g5sDSdzPZYt__shz7Lw";
 
   try {
-    const res = await fetch("https://dev-beta-api.llmcontrols.ai/api/v1/run/0ec40db5-7b3f-4dce-aabe-d3b48b60a70a?sync=false", {
+    const res = await fetch("https://dev-beta-api.llmcontrols.ai/api/v1/run/0ec40db5-7b3f-4dce-aabe-d3b48b60a70a?stream=false", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -16,9 +16,20 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(body),
     });
 
+    if (!res.ok) {
+      const errorText = await res.text();
+      return NextResponse.json({ 
+        error: "AI processing failed", 
+        details: errorText 
+      }, { status: res.status });
+    }
+
     const data = await res.json();
     return NextResponse.json(data);
   } catch (err) {
-    return NextResponse.json({ error: "API request failed" }, { status: 500 });
+    return NextResponse.json({ 
+      error: "AI processing failed", 
+      details: err instanceof Error ? err.message : 'Unknown error' 
+    }, { status: 500 });
   }
 }

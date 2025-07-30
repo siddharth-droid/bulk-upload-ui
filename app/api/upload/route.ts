@@ -14,9 +14,20 @@ export async function POST(req: NextRequest) {
       body: formData,
     });
 
+    if (!res.ok) {
+      const errorText = await res.text();
+      return NextResponse.json({ 
+        error: "Upload failed", 
+        details: errorText 
+      }, { status: res.status });
+    }
+
     const data = await res.json();
     return NextResponse.json(data);
   } catch (err) {
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    return NextResponse.json({ 
+      error: "Upload failed", 
+      details: err instanceof Error ? err.message : 'Unknown error' 
+    }, { status: 500 });
   }
 }
